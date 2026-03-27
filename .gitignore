@@ -24,3 +24,7 @@ __pycache__/
 # IPython
 profile_default/
 ipython_config.py
+
+train/dataset_coco
+train/baseline
+train/weights/topk

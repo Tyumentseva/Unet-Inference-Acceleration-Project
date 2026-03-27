@@ -1,0 +1,59 @@
+[project]
+name = "unet_env"
+version = "0.1.0"
+requires-python = "==3.13.7"
+dependencies = [
+    "ipykernel>=7.2.0",
+    "ipython>=9.11.0",
+    "ipywidgets>=8.1.8",
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.3",
+    "pycocotools>=2.0.11",
+    "ruff>=0.15.7",
+    "segmentation-models-pytorch>=0.5.0",
+    "termcolor>=3.3.0",
+    "torch>=2.11.0",
+    "torchvision>=0.26.0",
+    "tqdm>=4.67.3",
+    "triton>=3.6.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.ruff]
+target-version = "py313"
+
+lint.select = ["E", "F", "W"]
+lint.ignore = []
+
+lint.fixable = ["ALL"]
+lint.unfixable = []
+
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+
+    ".tmp"
+]
+
+line-length = 120

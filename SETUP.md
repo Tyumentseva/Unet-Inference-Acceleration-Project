@@ -8,12 +8,12 @@
 2. Разверните виртуальное окружение с нужной версией питона при помощи [uv](https://docs.astral.sh/uv/getting-started/installation/#installing-uv) в репозитории с задачами
   ```bash
   $ cd <путь к склонированному репозиторию>
-  $ uv venv --python 3.13.7 unet_env
+  $ uv sync
   ```
 
 3. Активируйте виртуальное окружение (будет активным, пока не закроете консоль, либо не выполните `deactivate`)
   ```bash
-  $ source unet_env/bin/activate
+  $ source .venv/bin/activate
   ```  
   Появится следующий префикс:
   ```bash
@@ -28,20 +28,18 @@
   Python 3.13.7
   ```
 
-5. Установите зависимости через uv из `pyproject.toml`:
-  ```bash
-  # установка зависимостей из pyproject.toml
-  $ uv sync --active
-  
-  # для запуска jupyter тетрадок потребуется установить
-  $ uv sync --extra notes --active
-  ```
-  Предварительно проверьте, что команда выполняется из корня проекта, где лежит `pyproject.toml`.
+5. Работа с пакетами
 
-
-### Запуск ноутбука
 ```bash
-(shad_env)$ jupyter notebook
+uv add <package> или с версией uv add requests==2.31.0
+uv remove <package>
+uv lock
+uv sync
 ```
 
-После выполнения команды выше, jupyter запустится в браузере, необходимо в левой панели выбрать нужный блокнот и открыть его.
+### Запуск линтера
+
+```bash
+uv run ruff check .
+uv run ruff check . --fix
+```
