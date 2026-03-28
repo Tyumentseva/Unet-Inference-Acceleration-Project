@@ -13,10 +13,19 @@
 # Структура проекта
 
 ```
-├── src/
-│   ├── dataset.py
-│   ├── model.py
-│   └── benchmark.py
+src/
+├── benchmark/
+│   ├── benchmarker.py
+│   ├── measurement_strategy.py
+│   └── __init__.py
+├── profile/
+│   ├── profiler.py
+│   └── __init__.py
+├── flops/
+│   ├── flops_counter.py
+│   └── __init__.py
+├── __init__.py
+├── train/
 ├── notebooks/
 ├── main.py
 ├── pyroject.toml
