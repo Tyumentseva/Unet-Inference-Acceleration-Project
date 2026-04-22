@@ -28,3 +28,5 @@ ipython_config.py
 notebooks/train/dataset_coco
 notebooks/train/baseline
 weights/topk
+
+notebooks/experiments/sparsification/weights
