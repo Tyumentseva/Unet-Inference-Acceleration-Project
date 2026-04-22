@@ -20,6 +20,7 @@ class Benchmarker:
     ):
         self.device = self._get_device(device)
         self.model = model.to(device).eval()
+        self.strategy = strategy
         
         self.warmup = warmup_count
         self.runs = inference_count
