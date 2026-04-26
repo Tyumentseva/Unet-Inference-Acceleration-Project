@@ -3,8 +3,8 @@ from torch.profiler import profile, ProfilerActivity, schedule
 from tqdm import trange
 
 
-def profile_model(model, input_size=(1, 3, 512, 512), input_dtype=torch.bfloat16, device='cuda'):
-    example_tensor = torch.ones(input_size, dtype=input_dtype, device=device)
+def profile_model(model, input_shape=(1, 3, 512, 512), input_dtype=torch.bfloat16, device='cuda'):
+    example_tensor = torch.randn(input_shape, device=device, dtype=input_dtype)
     model.to(device)
     model.eval()
 
