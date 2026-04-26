@@ -44,6 +44,7 @@ project
 ├── weights/  # веса модели
 │   └── checkpoint_coco_fp16.pt
 ├── unet_inference.pptx
+├── unet_inference.pdf
 ├── pyroject.toml
 ├── uv.lock
 ├── SETUP.md
