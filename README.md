@@ -17,8 +17,8 @@ project
 │   │   ├── traces/
 │   │   ├── LSQ_inference.ipynb
 │   │   ├── LSQuantization_8bit_conv2d_inference.ipynb
+│   │   ├── LSQuantization_8bit_triton_inference.ipynb
 │   │   ├── torch_compile.ipynb
-│   │   └── torch_compile_bf16_pruning_structured.ipynb
 │   │   └── torch_compile_bf16_pruning_structured.ipynb
 │   └── model/  # блокноты по обучению модели и её тестовом запуске
 │       ├── test/
@@ -68,9 +68,6 @@ project
 2. Датасет COCO:
    - train: [изображения](http://images.cocodataset.org/zips/train2017.zip), [аннотации](http://images.cocodataset.org/annotations/annotations_trainval2017.zip)
    - valid: [изображения](http://images.cocodataset.org/zips/val2017.zip), [аннотации](http://images.cocodataset.org/annotations/annotations_trainval2017.zip)
-3. Аппаратное обеспечение:
-   - CPU:
-   - GPU:
 
 # Описание экспериментов
 В таблицах ниже представлены группы планируемых экспериментов по измерению end-to-end latency и throughput для всех конфигураций проекта. Качество модели оценивается относительно fp16 baseline с использованием метрики IoU.
@@ -89,24 +86,25 @@ project
 
 ### 2. Оптимизации aware training
 
-| Конфигурация | Latency (ms) | Throughput (img/s) при batch_size=16  | IoU |
-|--------------|--------------|---------------------------------------|--------|
-| **Baseline** | |                                       | |
-| PyTorch fp16 (baseline) | 19.6 | 585                                | 45.2 |
-| **Aware-training оптимизация** | |                                       | |
-| LSQ - conv2d -квантизация | 29.2 | 400                                 | 0.87 |
-| LSQ - triton -квантизация | 400 | 150                                  | 47.5 |
-| Спарсификация (2:4 semi-structured) | |                                       | |
-| | |                                       | |
+| Конфигурация | Latency (ms) | Throughput (img/s) при batch_size=16 | IoU |
+|--------------|--------------|---------------------------------------|-----|
+| **Baseline** |              |                                       |     |
+| PyTorch fp16 (baseline) | 19.6 | 585 | 45.2 |
+| **Aware-training оптимизация** | | | |
+| LSQ - conv2d -квантизация | 29.2 | 400 | 0.87 |
+| LSQ - triton -квантизация | 400 | 150 | 47.5 |
+| Прунинг | 19.6 | 600 | 46.0 |
 
 ### 3. Комбинированные методы
 
-| Конфигурация | Latency (ms) | Throughput (img/s)  при batch_size=16 | IoU |
-|--------------|--------------|---------------------------------------|--------|
-| **Baseline** | |                                       | |
-| PyTorch fp16 (baseline) | 19.6 | 585                                   | 45.2 |
-| **Комбинированные методы** | |                                       | |
-| torch.compile + квантизация | |                                       | |
-| TVM + спарсификация | |                                       | |
-| | |                                       | |
-
+| Конфигурация | Latency (ms) | Throughput (img/s) при batch_size=16 | IoU |
+|--------------|--------------|---------------------------------------|-----|
+| **Baseline** |              |                                       |     |
+| PyTorch fp16 (baseline) | 19.6 | 585 | 45.2 |
+| **Комбинированные методы** | | | |
+| torch.compile(mode="default") + triton-lsq-квантизация | 17.8 | 205 | 47.5 |
+| torch.compile(mode="max-autotune") + triton-lsq-квантизация | 17.3 | 205 | 47.5 |
+| torch.compile(mode="default") + conv2d-lsq-квантизация | 5.2 | 870 | 0.87 |
+| torch.compile(mode="max-autotune") + conv2d-lsq-квантизация | 4.3 | 880 | 0.87 |
+| torch.compile(mode="default") + прунинг | 5.4 | 1000 | 46.0 |
+| torch.compile(mode="max-autotune") + прунинг | 2.3 | 1200 | 45.9 |
