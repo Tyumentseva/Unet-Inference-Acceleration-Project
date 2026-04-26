@@ -1,8 +1,5 @@
-# Описание проекта
 
-Описание проекта можно найти на [странице описания проектов](https://docs.google.com/spreadsheets/d/1qPBzSfBVwHwDUPWAHXLmdiwRpu3rGWMuPPPK7FR7lVk/edit?gid=0#gid=0) курса ШАД [Эффективные модели ML и архитектуры нейросетей](https://lk.dataschool.yandex.ru/courses/2026-spring/7.1689-efficient-ml-model/).
-
-Цель проекта — ускорение инференса UNet-модели. В качестве бейзлайна рассматривается инференс на PyTorch с вычислениями в формате fp16. Для ускорения инференса относительно бейзлайна применяются: 
+а — ускорение инференса UNet-модели. В качестве бейзлайна рассматривается инференс на PyTorch с вычислениями в формате fp16. Для ускорения инференса относительно бейзлайна применяются: 
 - PyTorch torch.compile (JIT-компиляция графа вычислений); 
 - компилятор TVM (аппаратно-независимая оптимизация через Relax и TIR); 
 - квантизация (снижение точности весов и активаций); 
@@ -17,7 +14,12 @@ project
 ├── notebooks/
 │   ├── experiments/  # блокноты с кодом экспериментов
 │   │   ├── images/
-│   │   └── torch_compile.ipynb
+│   │   ├── traces/
+│   │   ├── LSQ_inference.ipynb
+│   │   ├── LSQuantization_8bit_conv2d_inference.ipynb
+│   │   ├── LSQuantization_8bit_triton_inference.ipynb
+│   │   ├── torch_compile.ipynb
+│   │   └── torch_compile_bf16_pruning_structured.ipynb
 │   └── model/  # блокноты по обучению модели и её тестовом запуске
 │       ├── test/
 │       │   └── load_baseline.ipynb
@@ -29,19 +31,23 @@ project
 │   │   ├── measurement_strategy.py
 │   │   └── __init__.py
 │   ├── profile/
-│   │   ├── profiler.py
+│   │   ├── profile.py
 │   │   └── __init__.py
-│   ├── flops/
-│   │   ├── flops_counter.py
+│   ├── model/
+│   │   ├── lsq_quantization/
+│       │   ├── lsq_inference_conv2d.py
+│       │   ├── lsq_inference_triton.py
+│       │   ├── lsq_train_conv2d.py
+│       │   └── __init__.py
 │   │   └── __init__.py
 │   └── __init__.py
 ├── weights/  # веса модели
 │   └── checkpoint_coco_fp16.pt
-├── main.py
+├── unet_inference.pptx
+├── unet_inference.pdf
 ├── pyroject.toml
 ├── uv.lock
 ├── SETUP.md
-├── RESULT.md
 └── README.md
 ```
 # Настройка окружения
@@ -63,14 +69,9 @@ project
 2. Датасет COCO:
    - train: [изображения](http://images.cocodataset.org/zips/train2017.zip), [аннотации](http://images.cocodataset.org/annotations/annotations_trainval2017.zip)
    - valid: [изображения](http://images.cocodataset.org/zips/val2017.zip), [аннотации](http://images.cocodataset.org/annotations/annotations_trainval2017.zip)
-3. Аппаратное обеспечение:
-   - CPU:
-   - GPU:
 
 # Описание экспериментов
-В таблицах ниже представлены группы планируемых экспериментов по измерению end-to-end latency и throughput для всех конфигураций проекта. Качество модели будет оцениваться относительно fp16 baseline с использованием метрики IoU.
-
-TODO: обновлять по мере погружения в материал
+В таблицах ниже представлены группы планируемых экспериментов по измерению end-to-end latency и throughput для всех конфигураций проекта. Качество модели оценивается относительно fp16 baseline с использованием метрики IoU.
 
 ### 1. Компиляторные оптимизации
 
@@ -84,36 +85,27 @@ TODO: обновлять по мере погружения в материал
 | TVM (Relax/TIR) | 26.7         | 83                                   | 45.2 |
 | |              |                                      |      |
 
-### 2. Пост-тренировочные оптимизации
+### 2. Оптимизации aware training
 
-| Конфигурация | Latency (ms) | Throughput (img/s) при batch_size=16  | IoU |
-|--------------|--------------|---------------------------------------|--------|
-| **Baseline** | |                                       | |
-| PyTorch fp16 (baseline) | 19.6 | 585                                | 45.2 |
-| **Пост-тренировочная оптимизация** | |                                       | |
-| Квантизация (int8, per-tensor) | |                                       | |
-| Квантизация (int8, per-channel) | |                                       | |
-| Спарсификация (2:4 semi-structured) | |                                       | |
-| Спарсификация + квантизация | |                                       | |
-| | |                                       | |
+| Конфигурация | Latency (ms) | Throughput (img/s) при batch_size=16 | IoU |
+|--------------|--------------|---------------------------------------|-----|
+| **Baseline** |              |                                       |     |
+| PyTorch fp16 (baseline) | 19.6 | 585 | 45.2 |
+| **Aware-training оптимизация** | | | |
+| LSQ - conv2d -квантизация | 29.2 | 400 | 0.87 |
+| LSQ - triton -квантизация | 400 | 150 | 47.5 |
+| Прунинг | 19.6 | 600 | 46.0 |
 
 ### 3. Комбинированные методы
 
-| Конфигурация | Latency (ms) | Throughput (img/s)  при batch_size=16 | IoU |
-|--------------|--------------|---------------------------------------|--------|
-| **Baseline** | |                                       | |
-| PyTorch fp16 (baseline) | 19.6 | 585                                   | 45.2 |
-| **Комбинированные методы** | |                                       | |
-| torch.compile + квантизация | |                                       | |
-| TVM + спарсификация | |                                       | |
-| | |                                       | |
-
-# Результаты
-Результаты всех экспериментов подробно изложены в [файле](RESULT.md).
-
-Эксперимент со следующей конфигурацией (TODO: описать конфигурацию):
-- параметр 1
-- параметр 2
-- ...
-  
-показал лучшие результаты: (TODO: описать результаты лучшего эксперимента)
+| Конфигурация | Latency (ms) | Throughput (img/s) при batch_size=16 | IoU |
+|--------------|--------------|---------------------------------------|-----|
+| **Baseline** |              |                                       |     |
+| PyTorch fp16 (baseline) | 19.6 | 585 | 45.2 |
+| **Комбинированные методы** | | | |
+| torch.compile(mode="default") + triton-lsq-квантизация | 17.8 | 205 | 47.5 |
+| torch.compile(mode="max-autotune") + triton-lsq-квантизация | 17.3 | 205 | 47.5 |
+| torch.compile(mode="default") + conv2d-lsq-квантизация | 5.2 | 870 | 0.87 |
+| torch.compile(mode="max-autotune") + conv2d-lsq-квантизация | 4.3 | 880 | 0.87 |
+| torch.compile(mode="default") + прунинг | 5.4 | 1000 | 46.0 |
+| torch.compile(mode="max-autotune") + прунинг | 2.3 | 1200 | 45.9 |
