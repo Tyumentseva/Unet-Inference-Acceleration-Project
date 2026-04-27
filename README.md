@@ -81,11 +81,11 @@ project
 | Конфигурация | Latency (ms) | Throughput (img/s) при batch_size=16 | IoU  |
 |--------------|--------------|--------------------------------------|------|
 | **Baseline** |              |                                      |      |
-| PyTorch fp16 (baseline) | 19.6         | 585                                  | 45.2 |
+| PyTorch fp16 (baseline) | 19.6         | 585                                  | 48.2 |
 | **Компиляторные оптимизации** |              |                                      |      |
-| PyTorch torch.compile (mode="default") | 5.7          | 972                                  | 45.2 |
-| PyTorch torch.compile (mode="max-autotune") | 2.6          | 1076                                 | 45.2 |
-| TVM (Relax/TIR) | 26.7         | 83                                   | 45.2 |
+| PyTorch torch.compile (mode="default") | 5.7          | 972                                  | 48.2 |
+| PyTorch torch.compile (mode="max-autotune") | 2.6          | 1076                                 | 48.2 |
+| TVM (Relax/TIR) | 26.7         | 83                                   | 48.2 |
 | |              |                                      |      |
 
 ### 2. Оптимизации aware training
@@ -93,7 +93,7 @@ project
 | Конфигурация | Latency (ms) | Throughput (img/s) при batch_size=16 | IoU |
 |--------------|--------------|---------------------------------------|-----|
 | **Baseline** |              |                                       |     |
-| PyTorch fp16 (baseline) | 19.6 | 585 | 45.2 |
+| PyTorch fp16 (baseline) | 19.6 | 585 | 48.2 |
 | **Aware-training оптимизация** | | | |
 | LSQ - conv2d -квантизация | 29.2 | 400 | 0.87 |
 | LSQ - triton -квантизация | 40.0 | 150 | 47.5 |
@@ -104,11 +104,11 @@ project
 | Конфигурация | Latency (ms) | Throughput (img/s) при batch_size=16 | IoU |
 |--------------|--------------|---------------------------------------|-----|
 | **Baseline** |              |                                       |     |
-| PyTorch fp16 (baseline) | 19.6 | 585 | 45.2 |
+| PyTorch fp16 (baseline) | 19.6 | 585 | 48.2 |
 | **Комбинированные методы** | | | |
 | torch.compile(mode="default") + triton-lsq-квантизация | 17.8 | 205 | 47.5 |
 | torch.compile(mode="max-autotune") + triton-lsq-квантизация | 17.3 | 205 | 47.5 |
 | torch.compile(mode="default") + conv2d-lsq-квантизация | 5.2 | 870 | 0.87 |
 | torch.compile(mode="max-autotune") + conv2d-lsq-квантизация | 4.3 | 880 | 0.87 |
 | torch.compile(mode="default") + прунинг | 5.4 | 1000 | 46.0 |
-| torch.compile(mode="max-autotune") + прунинг | 2.3 | 1200 | 45.9 |
+| torch.compile(mode="max-autotune") + прунинг | 2.3 | 1200 | 48.9 |
